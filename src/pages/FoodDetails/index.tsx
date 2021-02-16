@@ -75,6 +75,7 @@ const FoodDetails: React.FC = () => {
     async function loadFood(): Promise<void> {
       // Load a specific food with extras based on routeParams id
       const response = await api.get(`/foods/${routeParams.id}`);
+      const favorites = await api.get('/favorites');
 
       setFood({
         ...response.data,
@@ -84,8 +85,15 @@ const FoodDetails: React.FC = () => {
       setExtras(
         response.data.extras.map((extra: Extra) => ({ ...extra, quantity: 0 })),
       );
-    }
 
+      const favoriteIndex = favorites.data.findIndex(
+        (favorite: Food) => routeParams.id === favorite.id,
+      );
+
+      if (favoriteIndex > -1) {
+        setIsFavorite(true);
+      }
+    }
     loadFood();
   }, [routeParams]);
 
@@ -132,7 +140,7 @@ const FoodDetails: React.FC = () => {
       api.post('/favorites', food);
     }
 
-    setIsFavorite(status => !status);
+    setIsFavorite(!isFavorite);
   }, [isFavorite, food]);
 
   const cartTotal = useMemo(() => {
